@@ -34,20 +34,20 @@
         <v-col>
           <v-row   no-gutters justify="center">
                 <v-btn-toggle
-                    v-model="gameSettings.difficulty"
+                    v-model="difficulty"
                     tile
                     color="deep-purple accent-3"
                     group
                   >
-                    <v-btn  value="easy">
+                    <v-btn id="easy_button"  value="easy">
                       Easy
                     </v-btn>
 
-                    <v-btn value="medium">
+                    <v-btn id="medium_button" value="medium">
                       Medium
                     </v-btn>
 
-                    <v-btn value="hard">
+                    <v-btn id="hard_button" value="hard">
                       Hard
                     </v-btn>
 
@@ -60,7 +60,7 @@
         <v-btn
               depressed
               color="primary"
-              @click="()=> this.$router.push({ path: '/main', query: { ...gameSettings} })"
+              @click="()=> this.$router.push({ name: 'MainPage',  params: { userName, difficulty }})"
             >
               Start
             </v-btn>
@@ -82,33 +82,30 @@ export default defineComponent({
   components: {
     NameInput
   },
-  setup(props){
-   let gameSettings = reactive<GameSetting>({
-      userName: '',
-      difficulty: 'easy' as DifficultyType
-    })
-
+  setup(){
+    let userName = ref('')
+    let difficulty = ref<DifficultyType>('easy')
     let ready = ref(false)
 
     function nameSet(name: UsernameType){
       if(name.isValid){
-        gameSettings.userName = name.name;
+        userName.value = name.name;
       }else {
-        gameSettings.userName = '';
+        userName.value = '';
       }
     }
 
   
 
-    watch(()=> gameSettings.userName, (newValue, oldValue)=> { ready.value = newValue == '' ? false : true })
+    watch(()=> userName.value, (newValue, oldValue)=> { ready.value = newValue == '' ? false : true })
 
-    return {nameSet, gameSettings, ready}
+    return {nameSet, userName, difficulty, ready}
   }
 })
 
 export type GameSetting = {
     userName: string
-      difficulty: DifficultyType
+    difficulty: DifficultyType
 }
 export type DifficultyType = 'easy' | 'medium' | 'hard'
 </script>

@@ -15,9 +15,9 @@
             tile
             style="background-color: azure"
           >
-           {{ $route.query.userName }}
+           {{ $route.params.userName }}
            <br/>
-           Difficulty: {{$route.query.difficulty}}
+           Difficulty: {{$route.params.difficulty}}
           </v-card>
         </v-col>
       </v-row>
@@ -83,13 +83,13 @@ export default defineComponent({
     const route = useRoute();
     const numbrComponents= ref<NumberCardType[] >([]);
     let numberComponentCount = 0;
-      if(route.query?.difficulty == 'easy'){
+      if(route.params?.difficulty == 'easy'){
           timer.value = 180;
           numberComponentCount = 4;
-      }else if(route.query?.difficulty == 'medium'){
+      }else if(route.params?.difficulty == 'medium'){
           timer.value =120;
           numberComponentCount = 3;
-      } else if(route.query?.difficulty == 'hard'){
+      } else if(route.params?.difficulty == 'hard'){
           timer.value = 60;
           numberComponentCount = 2;
       }

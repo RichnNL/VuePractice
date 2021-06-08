@@ -14,13 +14,27 @@ describe('Testing home screen components', () => {
       props: {  }
     })
 
-    await input.setValue({inputValue: {
-      name: '0test'
-    }
-   })
+    await input.setValue({inputValue: {name: '0Test'}})
 
-   const errorParagraph = input.find('v-card > #screen_name_error');
+   const errorParagraph = await input.get('#screen_name_error');
     expect(errorParagraph.text() ) .toBe('Must start with a letter');
+  })
+
+  test('Medium difficulty selected', async () => {
+    const input = mount(NameInput, {
+      props: {  }
+    })
+    const button = input.findAll("button").filter(button => button.attributes("value") == 'medium')[0];
+    expect(button?.exists()).toBeTruthy();
+  })
+
+  test('Name set trigger on input ', async () => {
+    const input = mount(NameInput, {
+      props: {  }
+    })
+    const spy = jest.spyOn(input.vm, "nameSet");
+    input.trigger('input', {target: {value: 'Test'}})
+    expect(spy).toBeCalled();
   })
 
   
