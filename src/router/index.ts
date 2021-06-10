@@ -12,6 +12,7 @@ const routes: Array<RouteRecordRaw> = [
     name: 'MainPage',
     component: MainPage
   },
+  
 ]
 
 const router = createRouter({

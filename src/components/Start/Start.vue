@@ -28,26 +28,27 @@
    
         <v-col>
                 <v-row justify="center">
-                  <NameInput @input_name_changed="nameSet" />
+                    <NameInput @input_name_changed="nameSet"  />
                 </v-row>
         </v-col>
         <v-col>
           <v-row   no-gutters justify="center">
                 <v-btn-toggle
                     v-model="difficulty"
+                    mandatory
                     tile
                     color="deep-purple accent-3"
                     group
                   >
-                    <v-btn id="easy_button"  value="easy">
+                    <v-btn id="easy_button"  :value='easy' @click="setDifficulty('easy')">
                       Easy
                     </v-btn>
 
-                    <v-btn id="medium_button" value="medium">
+                    <v-btn id="medium_button" :value='medium' @click="setDifficulty('medium')">
                       Medium
                     </v-btn>
 
-                    <v-btn id="hard_button" value="hard">
+                    <v-btn id="hard_button" :value='hard'  @click="setDifficulty('hard')">
                       Hard
                     </v-btn>
 
@@ -60,7 +61,7 @@
         <v-btn
               depressed
               color="primary"
-              @click="()=> this.$router.push({ name: 'MainPage',  params: { userName, difficulty }})"
+              @click="setGameStore"
             >
               Start
             </v-btn>
@@ -75,31 +76,52 @@
 </template>
 
 <script lang='ts'>
-import { defineComponent, reactive, ref, watch } from 'vue'
+import { container } from 'tsyringe';
+import { defineComponent} from 'vue'
 import NameInput, { UsernameType } from './components/NameInput.vue'
+import GameStore from '../../stores/GameStore/gameStore';
+import GameStoreDataHandler from '../../dataHandler/gameStoreDataHandler';
+import { DifficultyType } from '@/stores/GameStore/gameStoreObjectInterface';
 export default defineComponent({
   name: 'StartPage',
   components: {
     NameInput
   },
-  setup(){
-    let userName = ref('')
-    let difficulty = ref<DifficultyType>('easy')
-    let ready = ref(false)
-
-    function nameSet(name: UsernameType){
+   setup() {
+    return {
+      gameStore: container.resolve(GameStore),
+      gameStoreDatahandler: container.resolve(GameStoreDataHandler),
+    };
+  },
+  data() {
+    return {
+      difficulty: 'easy' as DifficultyType,
+      userName: '' as string,
+      ready: false
+     }
+  },
+  methods: {
+    nameSet(name: UsernameType){
       if(name.isValid){
-        userName.value = name.name;
+       this.userName = name.name;
       }else {
-        userName.value = '';
+        this.userName = '';
       }
+    },
+    setDifficulty(difficulty: DifficultyType) {
+      this.difficulty = difficulty
+    },
+    setGameStore() {
+      this.gameStoreDatahandler.createNewGame(this.userName, this.difficulty);
+      this.$router.push({name: 'MainPage'})
     }
-
-  
-
-    watch(()=> userName.value, (newValue, oldValue)=> { ready.value = newValue == '' ? false : true })
-
-    return {nameSet, userName, difficulty, ready}
+  },
+  watch: {
+    userName:{
+      handler(newValue) { 
+          this.ready = newValue == '' ? false : true 
+      }
+    } 
   }
 })
 
@@ -107,7 +129,6 @@ export type GameSetting = {
     userName: string
     difficulty: DifficultyType
 }
-export type DifficultyType = 'easy' | 'medium' | 'hard'
 </script>
 
 

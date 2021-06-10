@@ -15,9 +15,9 @@
             tile
             style="background-color: azure"
           >
-           {{ $route.params.userName }}
+           {{ gameStore.getGame().userName }}
            <br/>
-           Difficulty: {{$route.params.difficulty}}
+           Difficulty: {{gameStore.getGame().difficulty}}
           </v-card>
         </v-col>
       </v-row>
@@ -45,10 +45,37 @@
             outlined
             tile
           >
-          <NumberCard @number_points_changed=pointsChanged  :index=index />
+          <NumberCard @number_points_changed=pointsChanged @numbers_moved_up="numbersMovedUp" :index=index  :numberAction="numberAction" @numbers_moved_down="numbersMovedDown" />
 
           </v-card>
           </div>
+        </v-col>
+         <v-col
+          cols="7"
+             align="center"
+      justify="center"
+        >
+        <div style="height: 100%!important; width: 100%; display: flex; justify-content: center; flex-direction: column;">
+        <div style="height: 40px; width: 30px;" @click="moveNumbersUp" >
+          <v-icon
+                large
+                color="blue darken-2"
+              >
+                mdi-arrow-up-bold-box-outline
+          </v-icon>
+          </div>
+           <div style=" height: 40px; width: 30px;" @click="moveNumbersDown">
+                    <v-icon
+                large
+                color="blue darken-2"
+              >
+                mdi-arrow-down-bold-box-outline
+          </v-icon>
+          </div>
+
+
+        </div>
+
         </v-col>
         <v-col cols="auto">
           <v-card
@@ -67,32 +94,24 @@
 </template>
 
 <script lang='ts'>
-import { defineComponent, onBeforeUnmount, reactive, ref, watch } from 'vue'
-import { useRoute } from 'vue-router';
-import  NumberCard, { NumberCardType }  from '../Main/components/NumberCard.vue'
+import GameStoreDataHandler from '@/dataHandler/gameStoreDataHandler';
+import GameStore from '@/stores/GameStore/gameStore';
+import { container } from 'tsyringe';
+import { defineComponent, onBeforeUnmount, ref } from 'vue'
+import  NumberCard  from '../Main/components/NumberCard.vue';
+import NumbersContainerStore from '../../stores/NumbersContainerStore/numberContainerStore';
+import NumbersContainerDataHandler from '../../dataHandler/numberContainerDataHandler';
 export default defineComponent({
   name: 'MainPage',
   components: {
     NumberCard
   },
   setup() {
-    const gameNumber  =  Math.floor(Math.random() *1000);
-    const timer = ref();
-    const points = ref(0);
-    const gameover = ref(false)
-    const route = useRoute();
-    const numbrComponents= ref<NumberCardType[] >([]);
-    let numberComponentCount = 0;
-      if(route.params?.difficulty == 'easy'){
-          timer.value = 180;
-          numberComponentCount = 4;
-      }else if(route.params?.difficulty == 'medium'){
-          timer.value =120;
-          numberComponentCount = 3;
-      } else if(route.params?.difficulty == 'hard'){
-          timer.value = 60;
-          numberComponentCount = 2;
-      }
+    const gameStore = container.resolve(GameStore);
+    const  gameStoreDatahandler = container.resolve(GameStoreDataHandler);
+    const numberContainerStore = container.resolve(NumbersContainerStore);
+    const numberContainerDataHandler = container.resolve(NumbersContainerDataHandler);
+     
       const countdown = setInterval(()=> {
         if(timer.value > 0) {
           timer.value--;
@@ -104,22 +123,31 @@ export default defineComponent({
       onBeforeUnmount(()=> {
         clearInterval(countdown)
       }) 
-
-      const pointsChanged = (numberComponent: NumberCardType) => {
-        const index = numbrComponents.value.findIndex(i => i.index == numberComponent.index);
-        if(index > -1){
-          numbrComponents.value[index].points = numberComponent.points;
-        }else {
-          numbrComponents.value.push(numberComponent);
-        }
-
-        points.value = numbrComponents.value.map(x => x.points).reduce((a, b) => a + b, 0);
-
+    return {numberContainerDataHandler, numberContainerStore, gameStore, gameStoreDatahandler}
+  },
+  data() {
+    return {
+      timer: Number,
+      points: Number,
+      gameover: Boolean
+     }
+  },
+  methods: {
+    initMain(){
+       if(this.gameStore.getGame().difficulty == 'easy'){
+        this.timer = 180;
+          numberContainerDataHandler.createNumberContainer(4);
+      }else if(gameStore.getGame().difficulty == 'medium'){
+          this.timer.value =120;
+          numberContainerDataHandler.createNumberContainer(3);
+      } else if(gameStore.getGame().difficulty == 'hard'){
+          timer.value = 60;
+          numberContainerDataHandler.createNumberContainer(2);
       }
-  
+    }
+  },
+  watch: {
 
-      
-    return {gameNumber, timer, points, numberComponentCount, pointsChanged}
   }
 
 })

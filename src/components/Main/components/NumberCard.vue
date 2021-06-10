@@ -42,13 +42,13 @@
 </template>
 
 <script lang='ts'>
-import { defineComponent, onBeforeUnmount, reactive, ref, watch } from "vue";
+import { defineComponent, PropType , reactive, ref, watch } from "vue";
 export default defineComponent({
   name: "NumberCard",
-  components: {},
-  props: {
-    index: Number
-  },
+ props: {
+        index: Number,
+        numberAction: Object as PropType<NumberAction>,
+    },
   setup(props, {emit}) {
     const number = ref(Math.floor(Math.random() * 90) + 10);
     let count = ref(0)
@@ -130,13 +130,38 @@ export default defineComponent({
            emit('number_points_changed',  { points: points.value, index: props.index })
     })
 
+    watch(()=> props.numberAction, (newValue) => {
+      console.log(newValue, 'props number action')
+      if(newValue?.kind == 'up'){
+        emit('numbers_moved_up' , {index: props.index, value: mathActions.plus});
+        mathActions.plus = mathActions.subtract;
+        mathActions.subtract = mathActions.multiply;
+        mathActions.multiply = mathActions.divide;
+        count.value++;
+      } else if(newValue?.kind == 'down') {
+         emit('numbers_moved_down' , {index: props.index, value: mathActions.divide});
+        mathActions.divide = mathActions.multiply;
+        mathActions.multiply = mathActions.subtract;
+        mathActions.subtract = mathActions.plus;
+        count.value++;
+      }else if(newValue?.kind == 'getDown' && newValue.index == props.index){
+        mathActions.plus = newValue.value;
+      }
+      else if(newValue?.kind == 'getUp' && newValue.index == props.index){
+        mathActions.divide = newValue.value;
+      }
+    })
+
     return { points, number, mathActions, count ,switchMultiplyDivide,  add, subtract, divide, multiply, divisble, originalValue, switchAddSubtract, switchSubtractMultiply, };
   },
 });
 
 type Props = {
   index: number
+ 
 }
+
+export type NumberAction  = {kind: 'up'}  |  {kind: 'down'} | {kind: 'getDown', value: number, index: number} | {kind: 'getUp', value: number, index: number} |  {kind: 'set'}
 
 export type NumberCardType =Props & {
   points: number

@@ -1,5 +1,6 @@
-import { mount, shallowMount } from '@vue/test-utils'
 import NameInput from '@/components/Start/components/NameInput.vue'
+import StartPage from '@/components/Start/Start.vue'
+import { mount } from '@vue/test-utils'
 
 describe('Testing home screen components', () => {
   test('Name input component mounts ', () => {
@@ -29,11 +30,11 @@ describe('Testing home screen components', () => {
   })
 
   test('Name set trigger on input ', async () => {
-    const input = mount(NameInput, {
+    const startWrapper = mount(StartPage, {
       props: {  }
     })
-    const spy = jest.spyOn(input.vm, "nameSet");
-    input.trigger('input', {target: {value: 'Test'}})
+    const spy = jest.spyOn(startWrapper.vm, "nameSet");
+    startWrapper.find("input").trigger('input', {target: {value: 'Test'}})
     expect(spy).toBeCalled();
   })
 

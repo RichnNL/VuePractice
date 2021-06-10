@@ -8,10 +8,6 @@ describe('main screen components', () => {
                 userName: 'Test',
                 difficulty: 'easy'
 
-            },
-            query: {
-                userName: 'Test',
-                difficulty: 'easy'
             }
         }
         const mockRouter = {
