@@ -111,49 +111,49 @@ export default defineComponent({
     const  gameStoreDatahandler = container.resolve(GameStoreDataHandler);
     const numberContainerStore = container.resolve(NumbersContainerStore);
     const numberContainerDataHandler = container.resolve(NumbersContainerDataHandler);
-     
-      const countdown = setInterval(()=> {
-        if(timer.value > 0) {
-          timer.value--;
-        }else  if(!gameover.value){
-          gameover.value = true;
-        }
-      }, 1000)
   
-      onBeforeUnmount(()=> {
-        clearInterval(countdown)
-      }) 
     return {numberContainerDataHandler, numberContainerStore, gameStore, gameStoreDatahandler}
   },
   data() {
     return {
-      timer: Number,
-      points: Number,
-      gameover: Boolean
+      timer: 0,
+      points:0,
+      gameover: false,
+      countdown:  setInterval(()=> {
+        this.initTimer()
+      }, 1000)
      }
   },
   methods: {
     initMain(){
        if(this.gameStore.getGame().difficulty == 'easy'){
         this.timer = 180;
-          numberContainerDataHandler.createNumberContainer(4);
-      }else if(gameStore.getGame().difficulty == 'medium'){
-          this.timer.value =120;
-          numberContainerDataHandler.createNumberContainer(3);
-      } else if(gameStore.getGame().difficulty == 'hard'){
-          timer.value = 60;
-          numberContainerDataHandler.createNumberContainer(2);
+          this.numberContainerDataHandler.createNumberContainer(4);
+      }else if(this.gameStore.getGame().difficulty == 'medium'){
+          this.timer =120;
+          this.numberContainerDataHandler.createNumberContainer(3);
+      } else if(this.gameStore.getGame().difficulty == 'hard'){
+          this.timer = 60;
+          this.numberContainerDataHandler.createNumberContainer(2);
       }
+    },
+    initTimer(){
+      if(this.timer > 0) {
+          this.timer--;
+        }else  if(!this.gameover){
+          this.gameover = true;
+        }
     }
   },
-  watch: {
-
+  created: function(){
+      this.initMain()
+  },
+  beforeDestory: function() {
+        clearInterval(this.countdown)
   }
-
 })
 
 
-export type DifficultyType = 'easy' | 'medium' | 'hard'
 </script>
 
 
