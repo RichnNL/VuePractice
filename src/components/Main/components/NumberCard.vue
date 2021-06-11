@@ -69,7 +69,8 @@ import { defineComponent, PropType } from "vue";
 export default defineComponent({
   name: "NumberCard",
   props: {
-    numbers: Object as PropType<NumberContainer>
+    numbers: Object as PropType<NumberContainer>,
+    parentMoves: Number
   },
   setup() {
     const numberContainerDataHandler = container.resolve(
@@ -168,9 +169,15 @@ if(this.numbers ) {
     numbers: {
       immediate: true,
       handler(newValue, oldValue) {
-        console.log(newValue, 'newvalue')
+        console.log()
       },
     },
+    parentMoves: {
+      immediate: true,
+      handler(newValue){
+        this.moves++;
+      },
+    }
   },
 });
 

@@ -45,7 +45,7 @@
             outlined
             tile
           >
-          <NumberCard  :numbers="container" />
+          <NumberCard :parentMoves="moves"  :numbers="container" />
 
           </v-card>
           </div>
@@ -119,6 +119,7 @@ export default defineComponent({
       timer: 0,
       points:0,
       gameover: false,
+      moves: 0,
       countdown:  setInterval(()=> {
         this.initTimer()
       }, 1000)
@@ -143,6 +144,14 @@ export default defineComponent({
         }else  if(!this.gameover){
           this.gameover = true;
         }
+    },
+    moveNumbersUp(){
+      this.numberContainerDataHandler.moveNumbersUp();
+      this.moves++;
+    },
+    moveNumbersDown(){
+      this.numberContainerDataHandler.moveNumbersDown();
+      this.moves++;
     }
   },
   created: function(){

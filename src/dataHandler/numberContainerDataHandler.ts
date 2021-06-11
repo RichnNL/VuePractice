@@ -96,6 +96,47 @@ export default class NumberContainersDataHandler {
       this.numbersContainerStore.setContainer(container);
     }
   }
+  moveNumbersUp(){
+    const containers = this.numbersContainerStore.getAll();
+    if(containers.length < 0){
+      return;
+    }
+
+    const tempFirst = containers[0].additionNumber;
+    for(let i = 0; i < containers.length; i++){
+        const tempContainer = containers[i];
+       tempContainer.additionNumber = containers[i].subtractionNumber;
+       tempContainer.subtractionNumber = containers[i].mulitplicationNumber;
+        tempContainer.mulitplicationNumber = containers[i].divisionNumber;
+        if(i == containers.length - 1 ){
+          tempContainer.divisionNumber = tempFirst;
+        }else {
+          tempContainer.divisionNumber = containers[i + 1].additionNumber;
+        }
+        this.numbersContainerStore.setContainer(tempContainer);
+    }
+  }
+  moveNumbersDown(){
+    const containers = this.numbersContainerStore.getAll();
+    if(containers.length < 0){
+      return;
+    }
+
+    const tempLast = containers[containers.length - 1].divisionNumber;
+    for(let i = containers.length - 1; i >  0 ; i--){
+        const tempContainer = containers[i];
+       tempContainer.divisionNumber = containers[i].mulitplicationNumber;
+       tempContainer.mulitplicationNumber = containers[i].subtractionNumber;
+        tempContainer.subtractionNumber = containers[i].additionNumber;
+        if(i == 0 ){
+          tempContainer.additionNumber = tempLast;
+        }else {
+          tempContainer.additionNumber = containers[i - 1].divisionNumber;
+        }
+        this.numbersContainerStore.setContainer(tempContainer);
+    }
+  }
+
 
 
 }
