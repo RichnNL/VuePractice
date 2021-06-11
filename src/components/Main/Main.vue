@@ -39,13 +39,13 @@
           cols="auto"
           class="mr-auto"
         >
-        <div v-for="(item, index) in numberComponentCount" :key="index">
+        <div v-for="(container, index) in numberContainerStore.getAll()" :key="index">
           <v-card
             class="pa-2"
             outlined
             tile
           >
-          <NumberCard @number_points_changed=pointsChanged @numbers_moved_up="numbersMovedUp" :index=index  :numberAction="numberAction" @numbers_moved_down="numbersMovedDown" />
+          <NumberCard  :numbers="container" />
 
           </v-card>
           </div>
@@ -97,7 +97,7 @@
 import GameStoreDataHandler from '@/dataHandler/gameStoreDataHandler';
 import GameStore from '@/stores/GameStore/gameStore';
 import { container } from 'tsyringe';
-import { defineComponent, onBeforeUnmount, ref } from 'vue'
+import { defineComponent} from 'vue'
 import  NumberCard  from '../Main/components/NumberCard.vue';
 import NumbersContainerStore from '../../stores/NumbersContainerStore/numberContainerStore';
 import NumbersContainerDataHandler from '../../dataHandler/numberContainerDataHandler';

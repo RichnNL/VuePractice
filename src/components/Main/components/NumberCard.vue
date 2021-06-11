@@ -1,31 +1,43 @@
 <template>
   <div class="container">
-    <div :class="{color_100 : points == 100, color_80 : points == 80, color_60 : points == 60, color_40 : points == 40, color_20 : points == 20,  color_0 : points == 0, main_number : true}"  >
-      <p>{{ number }}</p>
+    <div
+      :class="{
+        color_100: numbers.points == 100,
+        color_80: numbers.points == 80,
+        color_60: numbers.points == 60,
+        color_40: numbers.points == 40,
+        color_20: numbers.points == 20,
+        color_0: numbers.points == 0,
+        main_number: true,
+      }"
+    > 
+      <p>{{ numbers.mainNumber }}</p>
     </div>
     <div class="inner_container">
       <div class="math_sign">
         <div class="math_block" @click="add">
-          {{ mathActions.plus }}
+          {{ numbers.additionNumber }}
         </div>
         <div>+</div>
       </div>
       <div class="math_sign">
-        <div class="math_block" @click="subtract">
-          {{ mathActions.subtract }}
+        <div  :class="{ math_block: subtractable, math_block_disabled: !subtractable }" @click="subtract">
+          {{ numbers.subtractionNumber }}
         </div>
         <div>-</div>
       </div>
       <div class="math_sign">
         <div class="math_block" @click="multiply">
-          {{ mathActions.multiply }}
+          {{ numbers.mulitplicationNumber }}
         </div>
         <div>x</div>
       </div>
       <div class="math_sign">
-        
-        <div :class="{math_block: divisble, math_block_disabled: !divisble}" @click="divide">
-          {{ mathActions.divide }}
+        <div
+          :class="{ math_block: divisble, math_block_disabled: !divisble }"
+          @click="divide"
+        >
+          {{ numbers.divisionNumber }}
         </div>
         <div>÷</div>
       </div>
@@ -35,137 +47,134 @@
       <div class="math_block" @click="switchSubtractMultiply">Switch</div>
       <div class="math_block" @click="switchMultiplyDivide">Switch</div>
     </div>
-        <div style="display: inline-block;  position: absolute; right: 10px; white-space: nowrap;align-self: flex-end;">
-          Moves: {{count}}
+    <div
+      style="
+        display: inline-block;
+        position: absolute;
+        right: 10px;
+        white-space: nowrap;
+        align-self: flex-end;
+      "
+    >
+      Moves: {{ moves }}
     </div>
   </div>
 </template>
 
 <script lang='ts'>
-import { defineComponent, PropType , reactive, ref, watch } from "vue";
+import NumberContainersDataHandler from "@/dataHandler/numberContainerDataHandler";
+import { NumberContainer } from "@/stores/NumbersContainerStore/numberStoreObjectInterface";
+import { container } from "tsyringe";
+import { defineComponent, PropType } from "vue";
 export default defineComponent({
   name: "NumberCard",
- props: {
-        index: Number,
-        numberAction: Object as PropType<NumberAction>,
+  props: {
+    numbers: Object as PropType<NumberContainer>
+  },
+  setup() {
+    const numberContainerDataHandler = container.resolve(
+      NumberContainersDataHandler
+    );
+
+    return { numberContainerDataHandler };
+  },
+  data() {
+    return {
+      moves: 0,
+      divisble: true,
+      subtractable: true,
+    };
+  },
+  methods: {
+    switchAddSubtract() {
+      if (
+        this.numberContainerDataHandler.switchAddSubtract(this.numbers!.index)
+      ) {
+        this.moves++;
+        this.checkNumber()
+      }
     },
-  setup(props, {emit}) {
-    const number = ref(Math.floor(Math.random() * 90) + 10);
-    let count = ref(0)
-    let divisble = ref(false)
-
-    let points = ref(0)
-    let mathActions = reactive({
-      plus: Math.floor(Math.random() * number.value) + 1,
-      subtract: Math.floor(Math.random() * number.value) + 1,
-      divide: Math.floor((Math.random() * number.value) / 3) + 2,
-      multiply: Math.floor((Math.random() * number.value) / 3) + 1,
-    });
-
-    const originalValue = number.value;
-
-     if(  (number.value/mathActions.divide) % 1 == 0){
-        divisble.value = true; 
-       }
-
-    const add = () => {
-      number.value = mathActions.plus + number.value;
-    }
-
-    const subtract = () => {
-        number.value =  number.value - mathActions.subtract;
-    }
-
-        const divide = () => {
-            number.value = Math.floor(number.value/mathActions.divide)
-    }
-        const multiply = () => {
-        number.value =  mathActions.multiply * number.value;
-    }
-
-    const switchAddSubtract = () => {
-      const previousValue = mathActions.plus;
-      mathActions.plus = mathActions.subtract;
-      mathActions.subtract = previousValue;
-      count.value++;
-    }
-
-     const switchSubtractMultiply = () => {
-      const previousValue = mathActions.multiply;
-      mathActions.multiply = mathActions.subtract;
-      mathActions.subtract = previousValue;
-      count.value++;
-    }
-
-    const switchMultiplyDivide = () => {
-      const previousValue = mathActions.multiply;
-      mathActions.multiply = mathActions.divide;
-      mathActions.divide = previousValue;
-      count.value++;
-    }
-    watch(()=> number.value, (newValue, oldValue) => {
-      const dividedResult = number.value/mathActions.divide;
-       if( dividedResult % 1 == 0 && dividedResult != Infinity ){
-        divisble.value = true; 
-       }else {
-         divisble.value = false;
-       }
-      count.value++;
-      if(number.value == 0){
-          points.value = 100;
-      }else if(number.value == 1){
-         points.value = 80;
-      }else if(number.value > 1 && number.value <= 5){
-         points.value = 60;
+    switchSubtractMultiply() {
+      if (
+        this.numberContainerDataHandler.switchSubtractMultiply(
+          this.numbers!.index
+        )
+      ) {
+        this.moves++;
+        this.checkNumber()
       }
-      else if(originalValue >= 24 && number.value <= (originalValue/4) ){
-         points.value = 40;
-      } else if(originalValue >= 14 && number.value <= (originalValue/2)){
-         points.value = 20;
+    },
+    switchMultiplyDivide() {
+      if (this.numberContainerDataHandler.switchMultiplyDivide(this.numbers!.index)) {
+        this.moves++;
+        this.checkNumber()
       }
-      else {
-         points.value = 0;
+    },
+    add(){  
+      this.numberContainerDataHandler.addNumber(this.numbers!.index)
+         this.checkNumber()
+    },
+    subtract(){
+      if(this.subtractable){
+        this.numberContainerDataHandler.subtractNumber(this.numbers!.index)
+           this.checkNumber()
       }
+    },
+    multiply(){
+      this.numberContainerDataHandler.multiplyNumber(this.numbers!.index)
+         this.checkNumber()
+    },
+    divide(){
+      if(this.divisble){
+        this.numberContainerDataHandler.divideNumber(this.numbers!.index)
+        this.checkNumber()
+      }
+    },
+    checkNumber(){
+if(this.numbers ) {
+          const dividedResult = this.numbers.mainNumber / this.numbers!.divisionNumber;
+          if (dividedResult % 1 == 0 && dividedResult != Infinity) {
+            this.divisble = true;
+          } else {
+            this.divisble = false;
+          }
+  
+          if(this.numbers.mainNumber - this.numbers!.subtractionNumber < 0){
+            this.subtractable = false;
+          }else {
+            this.subtractable = true;
+          }
+  
+          let points = 0; 
+          this.moves++;
+          if (this.numbers.mainNumber == 0) {
+            points = 100;
+          } else if (this.numbers.mainNumber == 1) {
+            points = 80;
+          } else if (this.numbers.mainNumber > 1 && this.numbers.mainNumber <= 5) {
+            points = 60;
+          } else if (this.numbers.mainNumber >= 24 && this.numbers.mainNumber <= this.numbers.mainNumber / 4) {
+            points = 40;
+          } else if (this.numbers.mainNumber >= 14 && this.numbers.mainNumber <= this.numbers.mainNumber / 2) {
+            points = 20;
+          } 
+  
+          this.numberContainerDataHandler.pointsChanged(this.numbers!.index, points)
 
-           emit('number_points_changed',  { points: points.value, index: props.index })
-    })
-
-    watch(()=> props.numberAction, (newValue) => {
-      console.log(newValue, 'props number action')
-      if(newValue?.kind == 'up'){
-        emit('numbers_moved_up' , {index: props.index, value: mathActions.plus});
-        mathActions.plus = mathActions.subtract;
-        mathActions.subtract = mathActions.multiply;
-        mathActions.multiply = mathActions.divide;
-        count.value++;
-      } else if(newValue?.kind == 'down') {
-         emit('numbers_moved_down' , {index: props.index, value: mathActions.divide});
-        mathActions.divide = mathActions.multiply;
-        mathActions.multiply = mathActions.subtract;
-        mathActions.subtract = mathActions.plus;
-        count.value++;
-      }else if(newValue?.kind == 'getDown' && newValue.index == props.index){
-        mathActions.plus = newValue.value;
-      }
-      else if(newValue?.kind == 'getUp' && newValue.index == props.index){
-        mathActions.divide = newValue.value;
-      }
-    })
-
-    return { points, number, mathActions, count ,switchMultiplyDivide,  add, subtract, divide, multiply, divisble, originalValue, switchAddSubtract, switchSubtractMultiply, };
+        }
+    }
+  },
+  watch: {
+    numbers: {
+      immediate: true,
+      handler(newValue, oldValue) {
+        console.log(newValue, 'newvalue')
+      },
+    },
   },
 });
 
-type Props = {
-  index: number
- 
-}
 
-export type NumberAction  = {kind: 'up'}  |  {kind: 'down'} | {kind: 'getDown', value: number, index: number} | {kind: 'getUp', value: number, index: number} |  {kind: 'set'}
-
-export type NumberCardType =Props & {
-  points: number
-}
 </script>
 
 <style>
@@ -255,9 +264,9 @@ export type NumberCardType =Props & {
 }
 
 .side_container {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 </style>
 

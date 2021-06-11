@@ -7,12 +7,13 @@ import { INumberContainerStoreObject, NumberContainer } from './numberStoreObjec
 export default class NumbersContainerStore extends Store<INumberContainerStoreObject> implements INumberContainerStore {
   protected data(): INumberContainerStoreObject {
     return {
-        numberContainer: []
+        numberContainer: [],
+        points: 0
     };
   }
 
   setContainer(numberContainer: NumberContainer) {
-      let foundIndex = this.state.numberContainer.findIndex(x => x.index == numberContainer.index);
+      const foundIndex = this.state.numberContainer.findIndex(x => x.index == numberContainer.index);
       if(foundIndex == -1) {
         this.state.numberContainer.push()
         this.state.numberContainer.push(numberContainer);
@@ -23,5 +24,17 @@ export default class NumbersContainerStore extends Store<INumberContainerStoreOb
 
   getContainer(index: number): NumberContainer | undefined{
     return this.state.numberContainer.find(x => x.index == index)
+  }
+
+  getAll(): NumberContainer[] {
+    return this.state.numberContainer;
+  }
+
+  setTotalPoints(points: number) {
+    this.state.points = points;
+  }
+
+  getTotalPoints(){
+    return this.state.points;
   }
 }
