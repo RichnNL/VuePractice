@@ -8,7 +8,8 @@ export default class NumbersContainerStore extends Store<INumberContainerStoreOb
   protected data(): INumberContainerStoreObject {
     return {
         numberContainer: [],
-        points: 0
+        points: 0,
+        finished: false
     };
   }
 
@@ -36,5 +37,8 @@ export default class NumbersContainerStore extends Store<INumberContainerStoreOb
 
   getTotalPoints(){
     return this.state.points;
+  }
+  setFinished(){
+    this.state.finished = true;
   }
 }

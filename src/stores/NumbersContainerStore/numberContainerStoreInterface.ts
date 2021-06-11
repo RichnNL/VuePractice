@@ -10,4 +10,6 @@ export interface INumberContainerStore   {
          setTotalPoints(points: number): void
         
         getTotalPoints(): number
+
+        setFinished(): void
 }

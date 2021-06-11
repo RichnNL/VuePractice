@@ -1,3 +1,4 @@
+  import { IGameStoreObject } from '@/stores/GameStore/gameStoreObjectInterface';
 import NumbersContainerStore from '@/stores/NumbersContainerStore/numberContainerStore';
 import { INumberContainerStore } from '@/stores/NumbersContainerStore/numberContainerStoreInterface';
 import { inject, singleton } from 'tsyringe';
@@ -17,7 +18,8 @@ export default class NumberContainersDataHandler {
                 mulitplicationNumber: Math.floor((Math.random() * mainNumber) / 3) + 1,
                 divisionNumber: Math.floor((Math.random() * mainNumber) / 3) + 2,
                 index,
-                points: 0
+                points: 0,
+                finished: false
             });
       }
   }
@@ -135,6 +137,23 @@ export default class NumberContainersDataHandler {
         }
         this.numbersContainerStore.setContainer(tempContainer);
     }
+  }
+
+  finished(index: number){
+    const container = this.numbersContainerStore.getContainer(index);
+    if(container == undefined){
+      return;
+    }
+
+    this.numbersContainerStore.setContainer({...container, finished: true});
+    const notFinished = this.numbersContainerStore.getAll().findIndex(x => !x.finished);
+    if(notFinished == -1){
+      this.numbersContainerStore.setFinished();
+    }
+  }
+
+  saveGame(game: IGameStoreObject){
+    console.log(game)
   }
 
 

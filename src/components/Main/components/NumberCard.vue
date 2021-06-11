@@ -15,26 +15,26 @@
     </div>
     <div class="inner_container">
       <div class="math_sign">
-        <div class="math_block" @click="add">
+        <div :class="{ math_block: !gameOver && !perfectScore , math_block_disabled:  gameOver || perfectScore }" @click="add">
           {{ numbers.additionNumber }}
         </div>
         <div>+</div>
       </div>
       <div class="math_sign">
-        <div  :class="{ math_block: subtractable, math_block_disabled: !subtractable }" @click="subtract">
+        <div  :class="{ math_block: subtractable  ||  (!gameOver && !perfectScore), math_block_disabled: !subtractable ||  gameOver || perfectScore }" @click="subtract">
           {{ numbers.subtractionNumber }}
         </div>
         <div>-</div>
       </div>
       <div class="math_sign">
-        <div class="math_block" @click="multiply">
+        <div :class="{ math_block: !gameOver && !perfectScore , math_block_disabled:  gameOver || perfectScore }" @click="multiply">
           {{ numbers.mulitplicationNumber }}
         </div>
         <div>x</div>
       </div>
       <div class="math_sign">
         <div
-          :class="{ math_block: divisble, math_block_disabled: !divisble }"
+          :class="{ math_block: divisble ||  (!gameOver && !perfectScore), math_block_disabled: !divisble ||  gameOver || perfectScore }"
           @click="divide"
         >
           {{ numbers.divisionNumber }}
@@ -43,9 +43,9 @@
       </div>
     </div>
     <div class="side_container">
-      <div class="math_block" @click="switchAddSubtract">Switch</div>
-      <div class="math_block" @click="switchSubtractMultiply">Switch</div>
-      <div class="math_block" @click="switchMultiplyDivide">Switch</div>
+      <div :class="{ math_block:  !gameOver && !perfectScore, math_block_disabled:  gameOver || perfectScore }" @click="switchAddSubtract">Switch</div>
+      <div :class="{ math_block:  !gameOver && !perfectScore, math_block_disabled:  gameOver || perfectScore }" @click="switchSubtractMultiply">Switch</div>
+      <div :class="{ math_block:  !gameOver && !perfectScore, math_block_disabled:  gameOver || perfectScore }" @click="switchMultiplyDivide">Switch</div>
     </div>
     <div
       style="
@@ -70,7 +70,8 @@ export default defineComponent({
   name: "NumberCard",
   props: {
     numbers: Object as PropType<NumberContainer>,
-    parentMoves: Number
+    parentMoves: Number,
+    gameOver: Boolean
   },
   setup() {
     const numberContainerDataHandler = container.resolve(
@@ -84,10 +85,14 @@ export default defineComponent({
       moves: 0,
       divisble: true,
       subtractable: true,
+      perfectScore: false,
     };
   },
   methods: {
     switchAddSubtract() {
+      if(this.gameOver || this.perfectScore){
+        return;
+      }
       if (
         this.numberContainerDataHandler.switchAddSubtract(this.numbers!.index)
       ) {
@@ -96,6 +101,9 @@ export default defineComponent({
       }
     },
     switchSubtractMultiply() {
+        if(this.gameOver || this.perfectScore){
+        return;
+      }
       if (
         this.numberContainerDataHandler.switchSubtractMultiply(
           this.numbers!.index
@@ -106,33 +114,71 @@ export default defineComponent({
       }
     },
     switchMultiplyDivide() {
+        if(this.gameOver || this.perfectScore){
+        return;
+      }
       if (this.numberContainerDataHandler.switchMultiplyDivide(this.numbers!.index)) {
         this.moves++;
         this.checkNumber()
       }
     },
     add(){  
+        if(this.gameOver || this.perfectScore){
+        return;
+      }
       this.numberContainerDataHandler.addNumber(this.numbers!.index)
          this.checkNumber()
     },
     subtract(){
+        if(this.gameOver || this.perfectScore){
+        return;
+      }
       if(this.subtractable){
         this.numberContainerDataHandler.subtractNumber(this.numbers!.index)
            this.checkNumber()
       }
     },
     multiply(){
+        if(this.gameOver || this.perfectScore){
+        return;
+      }
       this.numberContainerDataHandler.multiplyNumber(this.numbers!.index)
          this.checkNumber()
     },
     divide(){
+        if(this.gameOver || this.perfectScore){
+        return;
+      }
       if(this.divisble){
         this.numberContainerDataHandler.divideNumber(this.numbers!.index)
         this.checkNumber()
       }
     },
+    calculatePoint() {
+          if(this.numbers == undefined){
+            return;
+          }
+          let points = 0; 
+          if (this.numbers.mainNumber == 0) {
+            points = 100;
+            this.perfectScore = true;
+            this.numberContainerDataHandler.finished(this.numbers.index)
+          } else if (this.numbers.mainNumber == 1) {
+            points = 80;
+          } else if (this.numbers.mainNumber > 1 && this.numbers.mainNumber <= 5) {
+            points = 60;
+          } else if (this.numbers.mainNumber >= 24 && this.numbers.mainNumber <= this.numbers.mainNumber / 4) {
+            points = 40;
+          } else if (this.numbers.mainNumber >= 14 && this.numbers.mainNumber <= this.numbers.mainNumber / 2) {
+            points = 20;
+          } 
+          points = points - this.moves;
+          this.numberContainerDataHandler.pointsChanged(this.numbers!.index, points)
+    },
     checkNumber(){
-if(this.numbers ) {
+          if(this.numbers == undefined) {
+                return
+          }
           const dividedResult = this.numbers.mainNumber / this.numbers!.divisionNumber;
           if (dividedResult % 1 == 0 && dividedResult != Infinity) {
             this.divisble = true;
@@ -145,37 +191,35 @@ if(this.numbers ) {
           }else {
             this.subtractable = true;
           }
-  
-          let points = 0; 
           this.moves++;
-          if (this.numbers.mainNumber == 0) {
-            points = 100;
-          } else if (this.numbers.mainNumber == 1) {
-            points = 80;
-          } else if (this.numbers.mainNumber > 1 && this.numbers.mainNumber <= 5) {
-            points = 60;
-          } else if (this.numbers.mainNumber >= 24 && this.numbers.mainNumber <= this.numbers.mainNumber / 4) {
-            points = 40;
-          } else if (this.numbers.mainNumber >= 14 && this.numbers.mainNumber <= this.numbers.mainNumber / 2) {
-            points = 20;
-          } 
-  
-          this.numberContainerDataHandler.pointsChanged(this.numbers!.index, points)
-
+          this.calculatePoint();
         }
-    }
   },
   watch: {
     numbers: {
       immediate: true,
-      handler(newValue, oldValue) {
-        console.log()
+      handler() {
+        console.log("")
       },
     },
     parentMoves: {
       immediate: true,
       handler(newValue){
-        this.moves++;
+        if(newValue > 0){
+          this.moves++;
+        }
+      },
+    },
+      gameOver: {
+      immediate: true,
+      handler(newValue){
+        this.calculatePoint();
+      },
+    },
+      perfectScore: {
+      immediate: true,
+      handler(newValue){
+         
       },
     }
   },

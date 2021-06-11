@@ -1,7 +1,8 @@
 
 export interface INumberContainerStoreObject extends Object {
     numberContainer: NumberContainer[]
-    points: number
+    points: number,
+    finished: boolean,
     [selector: string]: string | unknown[] | unknown;
 }
 
@@ -13,4 +14,5 @@ export interface  NumberContainer {
     divisionNumber: number
     index: number
     points : number
+    finished: boolean
 }

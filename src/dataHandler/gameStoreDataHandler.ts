@@ -18,4 +18,8 @@ export default class GameStoreDataHandler {
       })
   }
 
+  setTimeElapse(time: number){
+    this.GameStore.setGame({...this.GameStore.getGame(), timeElapsed: time})
+  }
+
 }

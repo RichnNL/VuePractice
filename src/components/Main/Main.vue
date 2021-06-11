@@ -79,6 +79,7 @@
         </v-col>
         <v-col cols="auto">
           <v-card
+            v-if="!gameOver"
             class="pa-2"
             outlined
             tile
@@ -86,6 +87,31 @@
            Time left:  {{timer}}
            <br/>
            Points: {{points}}
+          </v-card>
+          <v-card
+            v-else
+            class="pa-2"
+            outlined
+            tile
+            style="background-color: blanchedalmond"
+          >
+           Game over
+           <br/>
+            <v-btn
+              class="ma-2"
+              color="primary"
+              dark
+              @click="saveGame"
+      >
+        Save Game
+        <v-icon
+          dark
+          right
+        >
+          mdi-checkbox-marked-circle
+        </v-icon>
+      </v-btn>
+           Total Points : {{points}}
           </v-card>
         </v-col>
       </v-row>
@@ -97,7 +123,7 @@
 import GameStoreDataHandler from '@/dataHandler/gameStoreDataHandler';
 import GameStore from '@/stores/GameStore/gameStore';
 import { container } from 'tsyringe';
-import { defineComponent} from 'vue'
+import { defineComponent, ref, watch} from 'vue'
 import  NumberCard  from '../Main/components/NumberCard.vue';
 import NumbersContainerStore from '../../stores/NumbersContainerStore/numberContainerStore';
 import NumbersContainerDataHandler from '../../dataHandler/numberContainerDataHandler';
@@ -111,14 +137,20 @@ export default defineComponent({
     const  gameStoreDatahandler = container.resolve(GameStoreDataHandler);
     const numberContainerStore = container.resolve(NumbersContainerStore);
     const numberContainerDataHandler = container.resolve(NumbersContainerDataHandler);
-  
-    return {numberContainerDataHandler, numberContainerStore, gameStore, gameStoreDatahandler}
+    const gameOver = ref(false);
+   watch(()=> numberContainerStore.getState().finished, (newValue, oldValue)=> {
+      if(newValue){
+            gameOver.value = true;
+      }
+    })
+
+ 
+    return {gameOver, numberContainerDataHandler, numberContainerStore, gameStore, gameStoreDatahandler}
   },
   data() {
     return {
       timer: 0,
       points:0,
-      gameover: false,
       moves: 0,
       countdown:  setInterval(()=> {
         this.initTimer()
@@ -141,8 +173,8 @@ export default defineComponent({
     initTimer(){
       if(this.timer > 0) {
           this.timer--;
-        }else  if(!this.gameover){
-          this.gameover = true;
+        }else  if(!this.gameOver){
+          this.gameOver = true;
         }
     },
     moveNumbersUp(){
@@ -152,6 +184,18 @@ export default defineComponent({
     moveNumbersDown(){
       this.numberContainerDataHandler.moveNumbersDown();
       this.moves++;
+    },
+    saveGame(){
+      this.numberContainerDataHandler.saveGame(this.gameStore.getGame())
+    }
+  },
+  watch: {
+    gameOver: {
+      handler(newValue){
+      if(newValue.value){
+        this.gameStoreDatahandler.setTimeElapse(this.timer)
+      }
+      }
     }
   },
   created: function(){
