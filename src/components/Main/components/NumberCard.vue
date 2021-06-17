@@ -2,12 +2,12 @@
   <div class="container">
     <div
       :class="{
-        color_100: numbers.points == 100,
-        color_80: numbers.points == 80,
-        color_60: numbers.points == 60,
-        color_40: numbers.points == 40,
-        color_20: numbers.points == 20,
-        color_0: numbers.points == 0,
+        color_100: localPoint == 100,
+        color_80: localPoint == 80,
+        color_60: localPoint == 60,
+        color_40: localPoint == 40,
+        color_20: localPoint == 20,
+        color_0: localPoint == 0,
         main_number: true,
       }"
     > 
@@ -83,6 +83,7 @@ export default defineComponent({
   data() {
     return {
       moves: 0,
+      localPoint: 0,
       divisble: true,
       subtractable: true,
       perfectScore: false,
@@ -172,6 +173,7 @@ export default defineComponent({
           } else if (this.numbers.mainNumber >= 14 && this.numbers.mainNumber <= this.numbers.mainNumber / 2) {
             points = 20;
           } 
+          this.localPoint = points;
           points = points - this.moves;
           this.numberContainerDataHandler.pointsChanged(this.numbers!.index, points)
     },
@@ -212,14 +214,14 @@ export default defineComponent({
     },
       gameOver: {
       immediate: true,
-      handler(newValue){
+      handler(){
         this.calculatePoint();
       },
     },
       perfectScore: {
       immediate: true,
-      handler(newValue){
-         
+      handler(){
+         this.numberContainerDataHandler.finished(this.numbers!.index)
       },
     }
   },

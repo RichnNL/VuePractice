@@ -1,12 +1,14 @@
-  import { IGameStoreObject } from '@/stores/GameStore/gameStoreObjectInterface';
+import { IGameStoreObject } from '@/stores/GameStore/gameStoreObjectInterface';
 import NumbersContainerStore from '@/stores/NumbersContainerStore/numberContainerStore';
 import { INumberContainerStore } from '@/stores/NumbersContainerStore/numberContainerStoreInterface';
 import { inject, singleton } from 'tsyringe';
+import axios from 'axios';
 
 @singleton()
 export default class NumberContainersDataHandler {
 
   constructor(@inject(NumbersContainerStore) protected numbersContainerStore: INumberContainerStore) {}
+  
 
   createNumberContainer(amount: number){
       for(let index = 0; index  < amount; index++ ){
@@ -64,6 +66,7 @@ export default class NumberContainersDataHandler {
       container.points = points;
       const totalPoints  = this.numbersContainerStore.getAll().map(x => x.points).reduce((current, next) => current + next, 0);
       this.numbersContainerStore.setTotalPoints(totalPoints);
+      this.numbersContainerStore.setContainer(container);
       return true;
     }
     return false;
@@ -117,6 +120,7 @@ export default class NumberContainersDataHandler {
         }
         this.numbersContainerStore.setContainer(tempContainer);
     }
+    this.numbersContainerStore.setTotalPoints(this.numbersContainerStore.getTotalPoints() - containers.length)
   }
   moveNumbersDown(){
     const containers = this.numbersContainerStore.getAll();
@@ -125,7 +129,7 @@ export default class NumberContainersDataHandler {
     }
 
     const tempLast = containers[containers.length - 1].divisionNumber;
-    for(let i = containers.length - 1; i >  0 ; i--){
+    for(let i = containers.length - 1; i >=  0 ; i--){
         const tempContainer = containers[i];
        tempContainer.divisionNumber = containers[i].mulitplicationNumber;
        tempContainer.mulitplicationNumber = containers[i].subtractionNumber;
@@ -137,6 +141,7 @@ export default class NumberContainersDataHandler {
         }
         this.numbersContainerStore.setContainer(tempContainer);
     }
+    this.numbersContainerStore.setTotalPoints(this.numbersContainerStore.getTotalPoints() - containers.length)
   }
 
   finished(index: number){
@@ -152,8 +157,12 @@ export default class NumberContainersDataHandler {
     }
   }
 
-  saveGame(game: IGameStoreObject){
-    console.log(game)
+  async saveGame(game: IGameStoreObject){
+     const response = await axios.post("https://localhost:44384/GameHistory", {...game,  points: this.numbersContainerStore.getTotalPoints(), totalMoves: 0});
+      if(!(response.status >= 200 && response.status < 300)){
+          return false;
+        }
+      return response.data
   }
 
 

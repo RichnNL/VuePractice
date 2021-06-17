@@ -86,10 +86,10 @@
           >
            Time left:  {{timer}}
            <br/>
-           Points: {{points}}
+           Points: {{numberContainerStore.getTotalPoints()}}
           </v-card>
           <v-card
-            v-else
+        
             class="pa-2"
             outlined
             tile
@@ -98,6 +98,7 @@
            Game over
            <br/>
             <v-btn
+              v-if="!saving"
               class="ma-2"
               color="primary"
               dark
@@ -111,7 +112,12 @@
           mdi-checkbox-marked-circle
         </v-icon>
       </v-btn>
-           Total Points : {{points}}
+          <v-progress-circular
+          v-else
+      indeterminate
+      color="primary"
+    ></v-progress-circular>
+           Total Points : {{numberContainerStore.getTotalPoints()}}
           </v-card>
         </v-col>
       </v-row>
@@ -150,8 +156,8 @@ export default defineComponent({
   data() {
     return {
       timer: 0,
-      points:0,
       moves: 0,
+      saving: false,
       countdown:  setInterval(()=> {
         this.initTimer()
       }, 1000)
@@ -185,8 +191,11 @@ export default defineComponent({
       this.numberContainerDataHandler.moveNumbersDown();
       this.moves++;
     },
-    saveGame(){
-      this.numberContainerDataHandler.saveGame(this.gameStore.getGame())
+    async saveGame(){
+      this.saving = true;
+       const saved = await this.numberContainerDataHandler.saveGame(this.gameStore.getGame());
+       this.saving = false;
+       console.log(saved, 'saved')
     }
   },
   watch: {
